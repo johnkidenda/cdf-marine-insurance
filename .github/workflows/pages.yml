@@ -15,30 +15,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  enable-pages:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Enable GitHub Pages from Actions if needed
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          if gh api "repos/${GITHUB_REPOSITORY}/pages" >/dev/null 2>&1; then
-            echo "Pages already enabled"
-            gh api --method PUT "repos/${GITHUB_REPOSITORY}/pages" --input - <<'EOF'
-          {
-            "build_type": "workflow"
-          }
-          EOF
-          else
-            gh api --method POST "repos/${GITHUB_REPOSITORY}/pages" --input - <<'EOF'
-          {
-            "build_type": "workflow"
-          }
-          EOF
-          fi
-
   deploy:
-    needs: enable-pages
     runs-on: ubuntu-latest
     environment:
       name: github-pages
@@ -48,6 +25,8 @@ jobs:
         uses: actions/checkout@v4
       - name: Setup Pages
         uses: actions/configure-pages@v5
+        with:
+          enablement: true
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
